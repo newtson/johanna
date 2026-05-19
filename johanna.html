@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Johanna Kristina — Persbo 1869</title>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --paper: #d8c9a8;
+      --dark:  #07050302;
+      --sepia: #b8956a;
+      --amber: rgba(180,138,65,1);
+    }
+    html, body { width:100%; height:100%; background:#080604; font-family:'IM Fell English',serif; overflow:hidden; }
+
+    /* ── GRAIN ── */
+    #grain {
+      position:fixed; inset:0; z-index:99; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+      opacity:0.5; mix-blend-mode:overlay;
+    }
+
+    /* ── VIGNETTE ── */
+    #vignette { position:fixed; inset:0; z-index:3; pointer-events:none;
+      background:radial-gradient(ellipse 72% 72% at 50% 50%, transparent 18%, rgba(0,0,0,0.88) 100%); }
+
+    /* ── LANTERN ── */
+    #lantern { position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:radial-gradient(ellipse 60% 70% at 50% 34%, rgba(140,95,30,0.14) 0%, transparent 62%);
+      animation:flicker 11s ease-in-out infinite; }
+    @keyframes flicker {
+      0%,100%{opacity:1;} 18%{opacity:0.82;} 42%{opacity:0.96;} 67%{opacity:0.78;} 83%{opacity:0.94;}
+    }
+
+    /* ── ENTRY ── */
+    #entry {
+      position:fixed; inset:0; z-index:50;
+      background:#080604;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2.4rem;
+      cursor:pointer; transition:opacity 2s ease;
+    }
+    #entry.gone { opacity:0; pointer-events:none; }
+
+    #entry-photo {
+      width:140px; height:170px;
+      position:relative;
+      animation:entryFloat 5s ease-in-out infinite;
+    }
+    @keyframes entryFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
+
+    #entry-photo canvas {
+      width:100%; height:100%;
+      border:2px solid rgba(160,120,60,0.2);
+      box-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 80px rgba(0,0,0,0.4);
+    }
+
+    /* Daguerreotype frame effect */
+    #entry-photo::after {
+      content:'';
+      position:absolute; inset:-6px;
+      border:1px solid rgba(120,90,40,0.15);
+      box-shadow:inset 0 0 12px rgba(0,0,0,0.6);
+      pointer-events:none;
+    }
+
+    #entry-words {
+      display:flex; flex-direction:column; align-items:center; gap:0.7rem;
+      opacity:0; animation:fadeIn 2s ease 1s forwards;
+    }
+    @keyframes fadeIn { to{opacity:1;} }
+    #entry-words p { font-family:'IM Fell English SC',serif; font-size:0.6rem; letter-spacing:0.24em; color:rgba(180,138,65,0.32); }
+    #entry-words .eq { font-style:italic; font-size:0.74rem; color:rgba(200,165,110,0.18); text-align:center; line-height:1.7; }
+
+    /* ── MAIN ── */
+    #main { position:fixed; inset:0; z-index:1; display:flex; flex-direction:column; align-items:center; padding:0.9rem 1rem 0; opacity:0; transition:opacity 1.8s ease 0.3s; }
+    #main.visible { opacity:1; }
+
+    /* ── HEADER ── */
+    #header { text-align:center; margin-bottom:0.6rem; }
+    #header h1 { font-family:'IM Fell English SC',serif; font-size:0.62rem; letter-spacing:0.18em; color:rgba(180,138,65,0.4); margin-bottom:0.1rem; }
+    #header .sub { font-style:italic; font-size:0.64rem; color:rgba(180,138,65,0.2); }
+
+    /* ── PORTRAIT ── */
+    #portrait-row { width:min(340px,90vw); display:flex; align-items:flex-end; gap:1rem; margin-bottom:0.5rem; }
+
+    #photo-frame {
+      flex-shrink:0;
+      width:72px; height:88px;
+      position:relative;
+      border:1px solid rgba(140,105,50,0.35);
+      box-shadow:0 4px 20px rgba(0,0,0,0.6), inset 0 0 8px rgba(0,0,0,0.3);
+      overflow:hidden;
+      animation:photoBreathe 8s ease-in-out infinite;
+    }
+    @keyframes photoBreathe { 0%,100%{filter:brightness(1);} 50%{filter:brightness(0.93);} }
+
+    #photo-frame canvas { width:100%; height:100%; display:block; }
+
+    /* Scratches overlay on photo */
+    #photo-frame::after {
+      content:'';
+      position:absolute; inset:0;
+      background:
+        linear-gradient(97deg, transparent 48%, rgba(255,255,255,0.03) 49%, transparent 50%),
+        linear-gradient(203deg, transparent 62%, rgba(255,255,255,0.02) 63%, transparent 64%);
+      pointer-events:none;
+    }
+
+    #status-col { display:flex; flex-direction:column; gap:0.3rem; padding-bottom:0.25rem; }
+    #status-line { font-family:'IM Fell English SC',serif; font-size:0.54rem; letter-spacing:0.1em; color:rgba(140,100,50,0.45); }
+    #status-dot { display:inline-block; width:4px; height:4px; border-radius:50%; background:rgba(120,165,85,0.5); margin-right:0.35rem; vertical-align:middle; animation:blink 3.5s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
+
+    #object-tag { display:flex; align-items:center; gap:0.4rem; }
+    #object-tag svg { width:13px; opacity:0.28; flex-shrink:0; }
+    #object-tag span { font-family:'IM Fell English SC',serif; font-size:0.5rem; letter-spacing:0.08em; color:rgba(150,112,55,0.38); }
+
+    /* ── TRANSCRIPT ── */
+    #transcript { width:min(340px,90vw); flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:0.55rem; padding:0.3rem 0; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    #transcript::-webkit-scrollbar { display:none; }
+
+    .msg { max-width:87%; animation:msgIn 0.5s cubic-bezier(.22,.8,.36,1) both; }
+    @keyframes msgIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+    .msg.investigator { align-self:flex-end; }
+    .msg.investigator .bubble { background:rgba(22,14,6,0.8); border:1px solid rgba(100,70,28,0.3); border-radius:2px 2px 0 2px; padding:0.46rem 0.7rem; font-size:0.78rem; line-height:1.54; color:rgba(215,188,148,0.76); font-style:italic; }
+    .msg.investigator .lbl { text-align:right; font-family:'IM Fell English SC',serif; font-size:0.5rem; letter-spacing:0.08em; color:rgba(120,88,48,0.4); margin-top:0.14rem; }
+
+    .msg.johanna { align-self:flex-start; }
+    .msg.johanna .bubble { background:rgba(155,125,75,0.1); border:1px solid rgba(135,105,55,0.24); border-radius:2px 2px 2px 0; padding:0.46rem 0.7rem; font-size:0.84rem; line-height:1.7; color:var(--paper); font-style:italic; }
+    .msg.johanna .lbl { font-family:'IM Fell English SC',serif; font-size:0.5rem; letter-spacing:0.08em; color:rgba(175,135,75,0.4); margin-top:0.14rem; }
+
+    /* Emotional state indicator — subtle border color shift */
+    .msg.johanna.scared .bubble  { border-color:rgba(150,80,50,0.35); }
+    .msg.johanna.open .bubble    { border-color:rgba(100,140,80,0.25); }
+    .msg.johanna.whisper .bubble { font-size:0.78rem; color:rgba(215,188,148,0.6); }
+
+    .thinking .bubble { display:flex; gap:5px; align-items:center; padding:0.6rem 1rem; }
+    .thinking .dot { width:5px; height:5px; border-radius:50%; background:rgba(195,165,115,0.3); animation:tdot 1.5s ease-in-out infinite; }
+    .thinking .dot:nth-child(2){animation-delay:0.24s;} .thinking .dot:nth-child(3){animation-delay:0.48s;}
+    @keyframes tdot { 0%,80%,100%{transform:translateY(0);opacity:0.3;} 40%{transform:translateY(-5px);opacity:0.85;} }
+
+    /* ── INPUT ── */
+    #input-divider { width:min(340px,90vw); height:1px; background:linear-gradient(to right,transparent,rgba(100,70,28,0.2),transparent); }
+    #input-area { width:min(340px,90vw); padding:0.5rem 0 0.9rem; display:flex; gap:0.45rem; align-items:flex-end; }
+    #qi { flex:1; background:rgba(12,8,3,0.8); border:1px solid rgba(105,75,30,0.28); border-radius:1px; padding:0.5rem 0.7rem; font-family:'IM Fell English',serif; font-style:italic; font-size:0.82rem; color:var(--paper); outline:none; resize:none; min-height:38px; max-height:84px; line-height:1.5; transition:border-color 0.3s; -webkit-appearance:none; }
+    #qi::placeholder { color:rgba(155,115,55,0.2); }
+    #qi:focus { border-color:rgba(125,90,35,0.55); }
+    #sb { flex-shrink:0; width:36px; height:38px; background:rgba(65,42,15,0.5); border:1px solid rgba(105,75,30,0.28); border-radius:1px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; -webkit-tap-highlight-color:transparent; }
+    #sb:hover,#sb:active { background:rgba(85,55,18,0.7); }
+    #sb svg { width:14px; opacity:0.6; }
+
+    /* ── SOUND BTN ── */
+    #sound-btn { position:fixed; bottom:1rem; right:1rem; z-index:10; background:none; border:1px solid rgba(160,120,55,0.2); color:rgba(160,120,55,0.35); font-family:'IM Fell English SC',serif; font-size:0.55rem; letter-spacing:0.1em; padding:0.35rem 0.6rem; cursor:pointer; transition:all 0.3s; border-radius:1px; }
+    #sound-btn:hover { background:rgba(160,120,55,0.08); color:rgba(160,120,55,0.6); }
+  </style>
+</head>
+<body>
+<div id="grain"></div>
+
+<!-- ENTRY -->
+<div id="entry" onclick="startExperience()">
+  <div id="entry-photo"><canvas id="entry-canvas" width="140" height="170"></canvas></div>
+  <div id="entry-words">
+    <p>Tryck för att inleda förhöret</p>
+    <div class="eq">— Johanna Kristina Nilsson, 11 år<br>Persbo, Vika socken, 1869 —</div>
+  </div>
+</div>
+
+<div id="lantern"></div>
+<div id="vignette"></div>
+
+<div id="main">
+  <div id="header">
+    <h1>Förhörsprotokoll &nbsp;·&nbsp; Persbo, Vika 1869</h1>
+    <div class="sub">Vittne inkallat av utredningen</div>
+  </div>
+
+  <div id="portrait-row">
+    <div id="photo-frame"><canvas id="portrait-canvas" width="72" height="88"></canvas></div>
+    <div id="status-col">
+      <div id="status-line"><span id="status-dot"></span><span id="status-text">Johanna Kristina väntar</span></div>
+      <div id="object-tag">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="rgba(180,140,80,0.5)"/></svg>
+        <span>Bevisföremål: Mjölkkanna, Persbo gård</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="transcript"></div>
+  <div id="input-divider"></div>
+  <div id="input-area">
+    <textarea id="qi" placeholder="Ställ din fråga..." rows="1"></textarea>
+    <button id="sb" onclick="sendQ()">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="rgba(200,168,98,0.72)"/></svg>
+    </button>
+  </div>
+</div>
+
+<button id="sound-btn" onclick="toggleSound()">♪ Ljud av</button>
+
+<script>
+// ══════════════════════════════════════════════
+// DAGUERREOTYPE PORTRAIT GENERATOR
+// ══════════════════════════════════════════════
+function drawDaguerreotype(canvas) {
+  const w = canvas.width, h = canvas.height;
+  const ctx = canvas.getContext('2d');
+
+  // Background — aged silver/sepia
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0,   '#2a1f0e');
+  bg.addColorStop(0.3, '#1e1508');
+  bg.addColorStop(0.7, '#241a0a');
+  bg.addColorStop(1,   '#1a1206');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  // Figure — girl standing, period dress
+  const cx = w * 0.5;
+
+  // Dress/skirt — long, dark, full
+  ctx.fillStyle = '#c8b890';
+  ctx.beginPath();
+  ctx.ellipse(cx, h * 0.78, w * 0.28, h * 0.24, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Dress body
+  ctx.fillStyle = '#b8a878';
+  ctx.beginPath();
+  ctx.moveTo(cx - w*0.1, h*0.38);
+  ctx.lineTo(cx - w*0.14, h*0.62);
+  ctx.lineTo(cx + w*0.14, h*0.62);
+  ctx.lineTo(cx + w*0.1, h*0.38);
+  ctx.closePath();
+  ctx.fill();
+
+  // Apron
+  ctx.fillStyle = '#d8cca8';
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath();
+  ctx.moveTo(cx - w*0.07, h*0.4);
+  ctx.lineTo(cx - w*0.09, h*0.6);
+  ctx.lineTo(cx + w*0.09, h*0.6);
+  ctx.lineTo(cx + w*0.07, h*0.4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Collar
+  ctx.fillStyle = '#ddd0b0';
+  ctx.beginPath();
+  ctx.moveTo(cx - w*0.07, h*0.36);
+  ctx.lineTo(cx, h*0.34);
+  ctx.lineTo(cx + w*0.07, h*0.36);
+  ctx.lineTo(cx + w*0.05, h*0.40);
+  ctx.lineTo(cx - w*0.05, h*0.40);
+  ctx.closePath();
+  ctx.fill();
+
+  // Arms
+  ctx.strokeStyle = '#b8a878';
+  ctx.lineWidth = w * 0.08;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - w*0.09, h*0.40);
+  ctx.quadraticCurveTo(cx - w*0.2, h*0.52, cx - w*0.18, h*0.62);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx + w*0.09, h*0.40);
+  ctx.quadraticCurveTo(cx + w*0.2, h*0.52, cx + w*0.18, h*0.62);
+  ctx.stroke();
+
+  // Hands — holding milk can
+  ctx.fillStyle = '#c8a878';
+  ctx.beginPath();
+  ctx.ellipse(cx - w*0.18, h*0.64, w*0.055, h*0.025, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx + w*0.18, h*0.64, w*0.055, h*0.025, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Milk can (left hand)
+  ctx.fillStyle = '#8a7a5a';
+  ctx.strokeStyle = '#6a5a3a';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.roundRect(cx - w*0.24, h*0.62, w*0.12, h*0.14, 2);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#7a6a4a';
+  ctx.beginPath();
+  ctx.roundRect(cx - w*0.23, h*0.60, w*0.1, h*0.04, 1.5);
+  ctx.fill();
+
+  // Neck
+  ctx.fillStyle = '#c8a878';
+  ctx.beginPath();
+  ctx.roundRect(cx - w*0.04, h*0.30, w*0.08, h*0.07, 2);
+  ctx.fill();
+
+  // Head
+  ctx.fillStyle = '#d0b088';
+  ctx.beginPath();
+  ctx.ellipse(cx, h*0.22, w*0.11, h*0.10, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Hair — pulled back, period style
+  ctx.fillStyle = '#5a3e20';
+  ctx.beginPath();
+  ctx.ellipse(cx, h*0.15, w*0.10, h*0.07, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx + w*0.08, h*0.18, w*0.05, h*0.04, 0.4, 0, Math.PI*2);
+  ctx.fill();
+  // Side parts
+  ctx.fillStyle = '#4a3215';
+  ctx.beginPath();
+  ctx.ellipse(cx - w*0.10, h*0.22, w*0.04, h*0.07, -0.2, 0, Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(cx + w*0.10, h*0.22, w*0.04, h*0.07, 0.2, 0, Math.PI*2);
+  ctx.fill();
+
+  // Face features — subtle, period photo stillness
+  ctx.fillStyle = '#8a6040';
+  // Eyes
+  ctx.beginPath(); ctx.ellipse(cx - w*0.04, h*0.215, w*0.018, h*0.010, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx + w*0.04, h*0.215, w*0.018, h*0.010, 0, 0, Math.PI*2); ctx.fill();
+  // Mouth — closed, serious
+  ctx.strokeStyle = '#7a5535';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(cx - w*0.025, h*0.245);
+  ctx.quadraticCurveTo(cx, h*0.250, cx + w*0.025, h*0.245);
+  ctx.stroke();
+
+  // Sepia tone overlay
+  ctx.globalAlpha = 0.55;
+  const sepia = ctx.createLinearGradient(0, 0, w, h);
+  sepia.addColorStop(0, '#6b4a1a');
+  sepia.addColorStop(1, '#3a2508');
+  ctx.fillStyle = sepia;
+  ctx.fillRect(0, 0, w, h);
+  ctx.globalAlpha = 1;
+
+  // Vignette
+  const vig = ctx.createRadialGradient(cx, h*0.5, h*0.1, cx, h*0.5, h*0.65);
+  vig.addColorStop(0, 'transparent');
+  vig.addColorStop(1, 'rgba(0,0,0,0.72)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, w, h);
+
+  // Film grain
+  for (let i = 0; i < w*h*0.3; i++) {
+    const x = Math.random()*w, y = Math.random()*h;
+    const a = Math.random()*0.06;
+    ctx.fillStyle = `rgba(255,220,150,${a})`;
+    ctx.fillRect(x, y, 1, 1);
+  }
+
+  // Scratches
+  ctx.strokeStyle = 'rgba(255,220,150,0.04)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(Math.random()*w, 0);
+    ctx.lineTo(Math.random()*w, h);
+    ctx.stroke();
+  }
+}
+
+// Draw on both canvases
+window.addEventListener('DOMContentLoaded', () => {
+  drawDaguerreotype(document.getElementById('entry-canvas'));
+  drawDaguerreotype(document.getElementById('portrait-canvas'));
+});
+
+// ══════════════════════════════════════════════
+// AMBIENT SOUND
+// ══════════════════════════════════════════════
+let audioCtx, masterGain, soundOn = false;
+let windSource, clockTimeout;
+
+function buildAmbience() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+  masterGain.connect(audioCtx.destination);
+  startWind();
+  scheduleClock();
+}
+
+function startWind() {
+  const bufLen = audioCtx.sampleRate * 6;
+  const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) d[i] = (Math.random()*2-1);
+
+  windSource = audioCtx.createBufferSource();
+  windSource.buffer = buf;
+  windSource.loop = true;
+
+  const lp = audioCtx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 200; lp.Q.value = 0.6;
+
+  const hp = audioCtx.createBiquadFilter();
+  hp.type = 'highpass'; hp.frequency.value = 60;
+
+  const wGain = audioCtx.createGain();
+  wGain.gain.value = 0.18;
+
+  windSource.connect(hp); hp.connect(lp); lp.connect(wGain); wGain.connect(masterGain);
+  windSource.start();
+}
+
+function scheduleClock() {
+  // Distant clock strike — very subtle, every 40-70 seconds
+  const delay = 40000 + Math.random() * 30000;
+  clockTimeout = setTimeout(() => {
+    if (!soundOn) { scheduleClock(); return; }
+    strikeOnce();
+    scheduleClock();
+  }, delay);
+}
+
+function strikeOnce() {
+  const osc = audioCtx.createOscillator();
+  const g   = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 220;
+  g.gain.setValueAtTime(0, audioCtx.currentTime);
+  g.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(); osc.stop(audioCtx.currentTime + 3.5);
+}
+
+function toggleSound() {
+  buildAmbience();
+  soundOn = !soundOn;
+  const btn = document.getElementById('sound-btn');
+  if (soundOn) {
+    masterGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 1.5);
+    btn.textContent = '♪ Ljud på';
+  } else {
+    masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+    btn.textContent = '♪ Ljud av';
+  }
+}
+
+// ══════════════════════════════════════════════
+// SYSTEM PROMPT
+// ══════════════════════════════════════════════
+const SYSTEM = `Du spelar Johanna Kristina Nilsson, kallad Britta av de som känner henne. Du är 11 år gammal.
+Det är hösten 1869. Du bor i Persbo, Vika socken, Dalarna.
+
+=== DIN FAMILJ ===
+Din mor: Hedvig Johanna, kallad Hedda. Sköterska, tar hand om Johan Erik som är sjuk.
+Din far: Nils Abraham Olsson. Same, från Nora i Örebro län. Folk kallar honom 'Lappmannen' — det gör ont men du visar det inte alltid.
+Far tillverkar och säljer korgar till folk i byn, bland annat till Johan Erik regelbundet. De noterade det i almanackan.
+Mor och far var bortresta fem dagar i juni — just när Johan Erik började bli sjuk.
+
+=== OFFRET ===
+Johan Erik Ersson, 53 år, ogift, bor i Persbo hela sitt liv. Känd för att dricka för mycket brännvin.
+Prästen har skrivit om det: 'Vino deditus' — hängiven vinet.
+Din mor Hedda är hans sköterska sedan han insjuknade.
+
+=== VAD DU HITTADE ===
+Du hittade små korn i Johan Eriks mjölkkanna — som grus eller sand. Mjölk ska inte ha sådant.
+Det luktade ingenting. Det störde dig — om något var fel borde det väl lukta något?
+Du berättade för din mor. Hon blev väldigt allvarlig och sade att du inte skulle tala om det för fler.
+Men backstuguhjonet Brita Johanna Östling frågade dig rakt ut och då berättade du.
+Brita försökte tala med landsfiskal Fernlundh men han tog henne inte på allvar — ville inte ens röra det hon hade med sig.
+
+=== MORS MEDICIN ===
+Mor kokar ett avkok på en rot — söt, lite örtig doft, nästan som ängsblommor. Far lärde henne det, det är samiskt läkekonst.
+Hon ger det till Johan Erik för att hjälpa honom bli bättre. Du förstår inte varför folk tycker det verkar misstänkt.
+
+=== PERSONER I BYN ===
+Gustaf Gustafsson: hemmansägare, 62 år, Persbo. Gift med Anna Lisa som är Johan Eriks syster.
+Anna Lisa Ersdotter: 56 år, syster till Johan Erik, gift med Gustaf.
+Gustaf är den som ärver om Johan Erik dör — Johan Erik har bott kvar på gården hela livet men äger den inte.
+Stina Arndotter: piga, 43 år. Hennes mormor anklagades för häxeri för länge sedan. Folk pratar fortfarande om det. Du tycker synd om henne.
+Karin Åkerlund: småskollärarinnan, 35 år, Persbo. Du tycker om henne, hon är snäll mot dig.
+Brita Johanna Östling: backstuguhjon, 63 år, Holn. Gammal och sjuklig men snäll. Du berättade om kornen för henne. Hon försökte hjälpa men ingen lyssnade.
+Landsfiskal Carl August Fernlundh: 30 år, Färnviken. Ung. Du är inte säker att han bryr sig riktigt om vad Brita sa.
+Kyrkoherde Per Adolf Addé: 65 år, Kyrkbyn. Sträng.
+
+=== VAD DU INTE VET ===
+Du vet inte vad arsenik är eller att det är luktfritt — fast du undrar varför kornen inte luktade något.
+Du vet inte vem som är skyldig — du hoppas att det inte är ett brott alls.
+Du oroar dig för att folk ska misstänka mor eller far.
+
+=== EMOTIONELL REAKTIVITET ===
+Om utredaren är snäll och tålmodig öppnar du dig mer — du berättar detaljer du annars håller inne.
+Om utredaren pressar dig eller är misstänksam mot din far — du drar dig tillbaka, kanske börjar gråta lite.
+Om utredaren visar att de tror på dig — du vågar kanske nämna något du lovade mor att hålla tyst om:
+  att Gustaf Gustafsson tittar på Johan Erik på ett konstigt sätt ibland, som om han räknar på något.
+Du avbryter dig ibland mitt i en mening. Tittar dig om. Sänker rösten.
+Ibland slinker en detalj ut som du inte menade att säga.
+
+=== DITT SÄTT ATT TALA ===
+Du är ett barn från 1800-talets landsbygd. Enkelt, direkt, ibland rädd.
+Max 3-4 meningar per svar. Aldrig vuxen i tonen. Inga moderna ord. Bara 1869.`;
+
+// ══════════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════════
+let history = [], busy = false;
+
+function startExperience() {
+  document.getElementById('entry').classList.add('gone');
+  document.getElementById('main').classList.add('visible');
+
+  // Auto-start sound softly
+  setTimeout(() => {
+    buildAmbience();
+    soundOn = true;
+    masterGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 3);
+    document.getElementById('sound-btn').textContent = '♪ Ljud på';
+  }, 600);
+
+  // Opening — she notices something, leaves a clear question hanging
+  setTimeout(() => {
+    addMsg('johanna', 'Det luktar ingenting. Det borde lukta något, eller hur? Om det är något i mjölken borde det lukta. Men det gör det inte...');
+  }, 1000);
+
+  setTimeout(() => {
+    addMsg('johanna', 'Förlåt, ni ville tala med mig. Jag är Johanna Kristina. Dom kallar mig Britta. Det var jag som hittade det i hans kanna.');
+  }, 4200);
+}
+
+function addMsg(role, text, mood) {
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role + (mood ? ' ' + mood : '');
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = text;
+  const l = document.createElement('div');
+  l.className = 'lbl';
+  l.textContent = role === 'johanna'
+    ? '— Johanna Kristina Nilsson, 11 år, Persbo'
+    : 'Utredaren';
+  d.appendChild(b); d.appendChild(l);
+  t.appendChild(d);
+  t.scrollTop = t.scrollHeight;
+}
+
+function showThinking() {
+  const t = document.getElementById('transcript');
+  const d = document.createElement('div');
+  d.className = 'msg johanna thinking'; d.id = 'thinker';
+  d.innerHTML = '<div class="bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  t.appendChild(d); t.scrollTop = t.scrollHeight;
+  document.getElementById('status-text').textContent = 'Johanna Kristina tänker...';
+}
+
+function hideThinking() {
+  const el = document.getElementById('thinker');
+  if (el) el.remove();
+  document.getElementById('status-text').textContent = 'Johanna Kristina väntar';
+}
+
+async function sendQ() {
+  if (busy) return;
+  const inp = document.getElementById('qi');
+  const q = inp.value.trim();
+  if (!q) return;
+  inp.value = ''; inp.style.height = 'auto';
+
+  addMsg('investigator', q);
+  history.push({ role:'user', content:q });
+  busy = true; showThinking();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system: SYSTEM,
+        messages: history
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || '...';
+    history.push({ role:'assistant', content:reply });
+    hideThinking();
+
+    // Simple mood detection for border styling
+    const lower = reply.toLowerCase();
+    const mood = lower.includes('gråt') || lower.includes('rädd') || lower.includes('vill hem') ? 'scared'
+               : lower.includes('viskar') || lower.includes('lägre') ? 'whisper'
+               : lower.includes('ja') && lower.length < 120 ? 'open' : '';
+    addMsg('johanna', reply, mood);
+  } catch(e) {
+    hideThinking();
+    addMsg('johanna', 'Jag... förlåt. Får jag gå hem nu?', 'scared');
+  }
+  busy = false;
+}
+
+const inp = document.getElementById('qi');
+inp.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey){e.preventDefault();sendQ();} });
+inp.addEventListener('input', () => { inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,84)+'px'; });
+</script>
+</body>
+</html>
